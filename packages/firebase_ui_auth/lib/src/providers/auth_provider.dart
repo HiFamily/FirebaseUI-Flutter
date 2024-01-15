@@ -128,7 +128,14 @@ abstract class AuthProvider<T extends AuthListener,
       user
           .linkWithCredential(credential)
           .then((_) => authListener.onCredentialLinked(credential))
-          .catchError(authListener.onError);
+          .catchError((error) {
+        print(error);
+        if (user.isAnonymous) {
+          FirebaseUIAuth.signOut(context: context).then((value) {
+            onCredentialReceived(credential, AuthAction.signUp);
+          }).catchError(authListener.onError);
+        }
+      });
     } catch (err) {
       authListener.onError(err);
     }
